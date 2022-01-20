@@ -7,7 +7,7 @@ import PySimpleGUI as sg
 import os
 import string
 
-# Definir função para baixar do YouTube
+# Definir funções para baixar do YouTube
 def download_audio():
     #Baixar áudio e converter arquivo em formato .mp4 para .mp3
     link = valores['url']
