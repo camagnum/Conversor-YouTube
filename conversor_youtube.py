@@ -21,8 +21,8 @@ def download_audio():
 
     audio = yt.streams.get_audio_only()
 
-    audio.download(filename=title+'.mp4')
-
+    audio.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
+    os.chdir('/home/magnum/Música/Downloads')
     clip = mp.AudioFileClip(title+'.mp4')
     clip.write_audiofile(title+'.mp3')
 
@@ -41,10 +41,10 @@ def download_video():
     print('Título = ',title)
     print('Baixando...')
     ys = yt.streams.get_highest_resolution()
-    ys.download(filename=title+'.mp4')
+    ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
         
-def download_playlist():
-    #Baixar Playlist
+def download_pl_audio():
+    #Baixar Playlist de Áudios
     link = valores['url']
 
     pl = Playlist(link)
@@ -56,12 +56,30 @@ def download_playlist():
         title = [letter for letter in title if letter not in string.punctuation]
         title = ''.join(title)
         print("Titulo = ", title)
-        v = yt.streams.get_audio_only()
-        v.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
+        ys = yt.streams.get_audio_only()
+        ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
         os.chdir('/home/magnum/Música/Downloads')
         clip = mp.AudioFileClip(title+'.mp4')
         clip.write_audiofile(title+'.mp3')
         os.remove(title+'.mp4')
+
+    print("Downloads concluídos!")
+
+def download_pl_video():
+    #Baixar Playlist de Vídeos
+    link = valores['url']
+
+    pl = Playlist(link)
+
+    for url in pl.video_urls:
+
+        yt = YouTube(url,on_progress_callback=on_progress)
+        title = yt.title
+        title = [letter for letter in title if letter not in string.punctuation]
+        title = ''.join(title)
+        print("Titulo = ", title)
+        ys = yt.streams.get_audio_only()
+        ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
 
     print("Downloads concluídos!")
     
@@ -72,8 +90,9 @@ layout = [
     [sg.Text('Insira a URL:')],
     [sg.Input(size=(45,0),key='url',background_color='white')],
     [sg.Radio('Áudio',1,key='aud'),
-     sg.Radio('Vídeo',1,key='vid'),
-     sg.Radio('Playlist',1,key='pla')],
+     sg.Radio('Vídeo',1,key='vid')],
+    [sg.Radio('Vídeo Único',2,key='viu'),
+     sg.Radio('Playlist',2,key='pla')],
     [sg.Button('Converter!',button_color='white'),
     sg.Button('Finalizar!',button_color='white')],
     [sg.Output(size=(45,10),background_color='white')]
@@ -84,14 +103,17 @@ janela = sg.Window('Conversor YouTube para MP3',layout=layout)
 try:
     while True:
         evento,valores = janela.Read()
-        if evento == 'Converter!' and valores['aud'] == True:
+        if evento == 'Converter!' and valores['aud'] and valores['viu']:
             download_audio()
             
-        if evento == 'Converter!' and valores['vid'] == True:
+        if evento == 'Converter!' and valores['vid'] and valores['viu']:
             download_video()
             
-        if evento == 'Converter!' and valores['pla'] == True:
-            download_playlist()
+        if evento == 'Converter!' and valores['aud'] and valores['pla']:
+            download_pl_audio()
+            
+        if evento == 'Converter!' and valores['vid'] and valores['pla']:
+            download_pl_video()
             
         if evento == 'Finalizar!':
             janela.close()
@@ -99,6 +121,8 @@ try:
             
         if evento == sg.WIN_CLOSED:
             break
+
+        janela['url'].Update('')
 except:
     print('Ocorreu um erro!')
     
