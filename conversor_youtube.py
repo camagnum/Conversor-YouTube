@@ -11,6 +11,9 @@ import string
 def download_audio():
     #Baixar áudio e converter arquivo em formato .mp4 para .mp3
     link = valores['url']
+    caminho = valores['folder']
+    tra_caminho = f'{caminho}'
+    
     yt = YouTube(link,on_progress_callback=on_progress)
     title = yt.title
     title = [letter for letter in title if letter not in string.punctuation]
@@ -21,18 +24,21 @@ def download_audio():
 
     audio = yt.streams.get_audio_only()
 
-    audio.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
-    os.chdir('/home/magnum/Música/Downloads')
+    audio.download(output_path=tra_caminho,filename=title+'.mp4')
+    os.chdir(tra_caminho)
     clip = mp.AudioFileClip(title+'.mp4')
     clip.write_audiofile(title+'.mp3')
 
     os.remove(title+'.mp4')
 
+    janela['output'].Update('')
     print(yt.title + " has been successfully downloaded.")
             
 def download_video():
     #Baixar vídeo
     link = valores['url']
+    caminho = valores['folder']
+    tra_caminho = f'{caminho}'
 
     yt = YouTube(link,on_progress_callback=on_progress)
     title = yt.title
@@ -41,11 +47,16 @@ def download_video():
     print('Título = ',title)
     print('Baixando...')
     ys = yt.streams.get_highest_resolution()
-    ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
+    ys.download(output_path=tra_caminho,filename=title+'.mp4')
+
+    janela['output'].Update('')
+    print(yt.title + " has been successfully downloaded.")
         
 def download_pl_audio():
     #Baixar Playlist de Áudios
     link = valores['url']
+    caminho = valores['folder']
+    tra_caminho = f'{caminho}'
 
     pl = Playlist(link)
 
@@ -57,17 +68,20 @@ def download_pl_audio():
         title = ''.join(title)
         print("Titulo = ", title)
         ys = yt.streams.get_audio_only()
-        ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
-        os.chdir('/home/magnum/Música/Downloads')
+        ys.download(output_path=tra_caminho,filename=title+'.mp4')
+        os.chdir(tra_caminho)
         clip = mp.AudioFileClip(title+'.mp4')
         clip.write_audiofile(title+'.mp3')
         os.remove(title+'.mp4')
-
+    
+    janela['output'].Update('')
     print("Downloads concluídos!")
 
 def download_pl_video():
     #Baixar Playlist de Vídeos
     link = valores['url']
+    caminho = valores['folder']
+    tra_caminho = f'{caminho}'
 
     pl = Playlist(link)
 
@@ -79,8 +93,9 @@ def download_pl_video():
         title = ''.join(title)
         print("Titulo = ", title)
         ys = yt.streams.get_audio_only()
-        ys.download(output_path='/home/magnum/Música/Downloads',filename=title+'.mp4')
+        ys.download(output_path=tra_caminho,filename=title+'.mp4')
 
+    janela['output'].Update('')
     print("Downloads concluídos!")
     
 # Interface PySimpleGUI
@@ -89,16 +104,19 @@ sg.theme('DarkRed1')
 layout = [
     [sg.Text('Insira a URL:')],
     [sg.Input(size=(45,0),key='url',background_color='white')],
+    [sg.Text('Pasta de Destino:')],
+    [sg.Input(size=(45,0),key='path',background_color='white')],
+    [sg.FolderBrowse('Procurar Pasta',target='path',key='folder')],
     [sg.Radio('Áudio',1,key='aud'),
      sg.Radio('Vídeo',1,key='vid')],
     [sg.Radio('Vídeo Único',2,key='viu'),
      sg.Radio('Playlist',2,key='pla')],
     [sg.Button('Converter!',button_color='white'),
     sg.Button('Finalizar!',button_color='white')],
-    [sg.Output(size=(45,10),background_color='white')]
+    [sg.Output(size=(45,10),background_color='white',key='output')]
 ]
 
-janela = sg.Window('Conversor YouTube para MP3',layout=layout)
+janela = sg.Window('YouDownload',layout=layout)
 
 try:
     while True:
@@ -123,6 +141,8 @@ try:
             break
 
         janela['url'].Update('')
+        janela['path'].Update('')
+
 except:
     print('Ocorreu um erro!')
     
